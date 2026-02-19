@@ -5,8 +5,9 @@ import java.util.Scanner;
 public class Main {
     static Scanner sc = new Scanner(System.in);
     static UserService userService = new UserService();
-    static RentalService rentalService = new RentalService();
     static VehicleService vehicleService = new VehicleService();
+    static RentalService rentalService = new RentalService(vehicleService,userService);
+    
     public static void main(String[] args) {
         
 
@@ -33,9 +34,10 @@ public class Main {
         while(true){
         System.out.println("1.Add Vehicle");
         System.out.println("2.UpdateVehicle");
-        System.out.println("3.View Bookings");
-        System.out.println("4.View All Vehicles");
-        System.out.println("5.Back");
+        System.out.println("3.View Customers");
+        System.out.println("4.View All bookings");
+        System.out.println("5.View All Vehicles");
+        System.out.println("6.Back");
         int input = sc.nextInt();
         switch(input){
             case 1:
@@ -51,17 +53,24 @@ public class Main {
                 vehicleService.addVehicle(type, rate);
                 break;
             case 2:
-                
+                updateVehicles();
                 break;
             case 3:
-                System.out.println("Bookings are....");
+                if(userService.userlist.size()<2) System.out.println("No one regitered yet");
+                else{
+                System.out.println("Customers are....");
                 userService.showAllBookings().forEach(booking->System.out.println(booking));
+                }
                 break;
             case 4:
+                if(rentalService.bookinglist.isEmpty()) System.out.println("No one booked");
+                else rentalService.viewAllBookings().forEach(booking->System.out.println(booking));
+                break;
+            case 5:
                 vehicleService.viewAllVehicles().forEach(vehicle->System.out.println(vehicle));
                 System.out.println("Available vehicles:");
                 break;
-            case 5: 
+            case 6: 
             System.out.println("Going to menu page");
             return;
         }
@@ -91,6 +100,7 @@ public class Main {
                 System.out.println("Registered Successfully!");
                 break;
             case 2:
+                
                 System.out.println("Available vehicles are...");
                 vehicleService.viewAvailableVehicles().forEach(availableVehicles->System.out.println(availableVehicles));
                 break;
@@ -99,23 +109,29 @@ public class Main {
                 vehicleService.viewAllVehicles().forEach(vehicle->System.out.println(vehicle));
                 break;
             case 4:
-                System.out.println("Enter ur id");
-                int id = sc.nextInt();
+                if(Session.currentUser==null) {System.out.println("Register first to rent vehicle");return;}
                 System.out.println("Enter vehicle id you want to book:");
                 int veh_id = sc.nextInt();
                 System.out.println("Enter the days: ");
                 int days = sc.nextInt();
-                rentalService.bookVehicle(id, veh_id, days);
+                rentalService.bookVehicle(veh_id, days);
                 break;
             case 5:
+                if(Session.currentUser==null) {System.out.println("Register first to return vehicle");return;}
+                if(rentalService.bookinglist.isEmpty()) System.out.println("Not rented yet");
+                else{
                 System.out.println("Enter the vehicle id: ");
                 int v_id = sc.nextInt();
                 rentalService.returnVehicle(v_id);
-                
+                }
                 break;
             case 6:
+                if(Session.currentUser==null) {System.out.println("Register first to see bookings"); return;}
+                if(rentalService.bookinglist.isEmpty()) System.out.println("Not rented yet");
+                else{
                 System.out.println("My Bookings:");
                 rentalService.myBookings().forEach(mybooks->System.out.println(mybooks));
+                }
                 break;
             case 7: 
             System.out.println("Going to menu page");
@@ -126,30 +142,43 @@ public class Main {
     }
     }
 
-}
+
 static void updateVehicles(){
+    while(true){
     System.out.println("Enter vehicle id: ");
-                int vehicle_id = sc.nextInt();
-                sc.next();
-                System.out.println("Enter the status/feature to update of an vehicle: (type,rate,availability)");
-                String inpuString = sc.nextLine().toLowerCase();
-                if(inpuString.equals("type")){
-                    String new_type = sc.next();
-                    vehicleService.updateVehicleType(vehicle_id, new_type);
-                }
-                else if(inpuString.equals("rate")){
-                    int new_rate = sc.nextInt();
-                    vehicleService.updateVehicleRate(vehicle_id, new_rate);
-                }
-                else if(inpuString.equals("availability")){
-                    System.out.println("Enter 1.Available or 2.Not Available");
-                    int avail_num = sc.nextInt();
-                    if(avail_num==1) vehicleService.updateVehicleAvailability(vehicle_id, true);
-                    else if(avail_num==2) vehicleService.updateVehicleAvailability(vehicle_id, false);
-                    else System.out.println("Enter valid num");
-                }
-                else System.out.println("Enter valid one to update");
-                System.out.println("Vehicle Updated");
+    int vehicle_id = sc.nextInt();
+    System.out.println("Enter the status/feature to update of an vehicle: ");
+    System.out.println("1.Type\n2.Rate\n3.Availability\n");
+    int inpuString = sc.nextInt();
+    switch (inpuString) {
+        case 1:
+            System.out.println("Enter type to change");
+            String new_type = sc.next();
+            vehicleService.updateVehicleType(vehicle_id, new_type);
+            return;
+        case 2:
+            System.out.println("Enter new rate");
+            int new_rate = sc.nextInt();
+            vehicleService.updateVehicleRate(vehicle_id, new_rate);
+            return;
+        case 3:
+            System.out.println("1.Available\n2.Not Available");
+            int avail_num = sc.nextInt();
+            availabilitychange(avail_num, vehicle_id);
+            return;
+        default:
+            System.out.println("Enter valid one to update");
+            return;
+    }
+    }
 
-
+}
+static void availabilitychange(int num,int vehicle_id){
+    if(num==1) vehicleService.updateVehicleAvailability(vehicle_id, true);
+    else if(num==2) vehicleService.updateVehicleAvailability(vehicle_id, false);
+    else {
+        System.out.println("Enter valid num");
+        return;
+    }
+}
 }

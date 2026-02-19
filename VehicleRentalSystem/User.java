@@ -14,6 +14,13 @@ public class User {
         this.age = age;
         this.role = role;
     }
+    public int getUserId() 
+    {
+        return user_id;
+    }
+    public Role getRole(){
+        return role;
+    }
     @Override
     public String toString(){
         return(

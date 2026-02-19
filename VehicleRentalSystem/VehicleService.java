@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 public class VehicleService {
     private int vehicle_ctr=5;
-    static ArrayList<Vehicle> vehiclesList = new ArrayList<>();
-    static{
+    private ArrayList<Vehicle> vehiclesList = new ArrayList<>();
+    {
         vehiclesList.add(new Vehicle(1, VehicleType.BIKE, 10, true));
         vehiclesList.add(new Vehicle(2, VehicleType.SCOOTY, 20, true));
         vehiclesList.add(new Vehicle(3, VehicleType.BIKE, 30, true));
@@ -23,7 +23,7 @@ public class VehicleService {
         }
         return res;
     }
-    public static  Vehicle getVehicleById(int id){
+    public Vehicle getVehicleById(int id){
         for(Vehicle v: vehiclesList){
             if(v.getId()==id) return v;
         }
@@ -36,12 +36,12 @@ public class VehicleService {
     public void updateVehicleType(int vehicle_id,String type ){
         for(Vehicle v : vehiclesList){
             if(v.getId()==vehicle_id){
-                v.setType(VehicleType.valueOf(type));
+                v.setType(VehicleType.valueOf(type.toUpperCase()));
                 System.out.println("Type updated for vehicle - "+vehicle_id);
                 return;
             }
-            System.out.println("Vehicle Not found");
         }
+         System.out.println("Vehicle Not found");
 
 
     }
@@ -52,8 +52,11 @@ public class VehicleService {
                 System.out.println("Rate updated for vehicle - "+vehicle_id);
                 return;
             }
-            System.out.println("Vehicle Not found");
+            
+           
         }
+         System.out.println("Vehicle Not found");
+
 
 
     }
@@ -64,8 +67,9 @@ public class VehicleService {
                 System.out.println("Availability updated for vehicle - "+vehicle_id);
                 return;
             }
-            System.out.println("Vehicle Not found");
+            
         }
+         System.out.println("Vehicle Not found");
 
 
     }

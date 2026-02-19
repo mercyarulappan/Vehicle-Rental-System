@@ -5,10 +5,16 @@ import java.util.ArrayList;
 
 public class RentalService {
     private int rent_id=0;
-    static private int currentUser=0;
-    static ArrayList<Rental> bookinglist = new ArrayList<>();
-    public void bookVehicle(int user_id,int vehicle_id,int days){
-        Vehicle v = VehicleService.getVehicleById(vehicle_id);
+    Session session = new Session();
+    ArrayList<Rental> bookinglist = new ArrayList<>();
+    VehicleService vs;
+    UserService us;
+    public RentalService(VehicleService vs,UserService us){
+        this.vs = vs;
+        this.us = us;
+    }
+    public void bookVehicle(int vehicle_id,int days){
+        Vehicle v = vs.getVehicleById(vehicle_id);
         if(v==null){
             System.out.println("Vehicle not found...Enter available vehicle id");
             return;
@@ -17,7 +23,12 @@ public class RentalService {
             System.out.println("Vehicle is not available for now!! Choose other");
             return;
         }
-        currentUser = user_id;
+        int user_id = us.getCurrentUser().getUserId();
+        if(us.getUserById(user_id)==null){
+            System.out.println("User Not Registered.");
+            return;
+        }
+        session.currentUser = us.getCurrentUser();
         int total = days*v.getPrice();
         v.setAvailability(false);
         bookinglist.add(new Rental(rent_id++, user_id, vehicle_id,LocalDateTime.now(),"BOOKED", days,total));
@@ -26,19 +37,21 @@ public class RentalService {
         
     }
     public ArrayList<Rental> myBookings(){
-        System.out.println(currentUser);
         ArrayList<Rental> res = new ArrayList<>();
         for(Rental r: bookinglist){
-            if(r.getUserId() == currentUser) res.add(r);
+            if(r.getUserId() == session.currentUser.getUserId()) res.add(r);
         }
         return res;
     }
+    public ArrayList<Rental> viewAllBookings(){
+        return new ArrayList<>(bookinglist);
+    }
     public void returnVehicle(int vehicle_id){
-        Vehicle v = VehicleService.getVehicleById(vehicle_id);
+        Vehicle v = vs.getVehicleById(vehicle_id);
         if(v!=null && !v.availability()){
             v.setAvailability(true);
             for(Rental r : bookinglist){
-                if(r.getVehicleId()==vehicle_id && r.getUserId()==currentUser)
+                if(r.getVehicleId()==vehicle_id && r.getUserId()==session.currentUser.getUserId())
                     r.setStatus("RETURNED");
             }
             System.out.println("Vehicle Returned!");
